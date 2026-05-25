@@ -92,13 +92,16 @@ tasks.named("cyclonedxDirectBom").configure {
 }
 
 checkstyle {
+  toolVersion = '10.12.0'
   configDirectory = project.file('src/checkstyle')
   configFile = file('src/checkstyle/nohttp-checkstyle.xml')
+  ignoreFailures = false
 }
 
 checkstyleNohttp {
   configDirectory = project.file('src/checkstyle')
   configFile = file('src/checkstyle/nohttp-checkstyle.xml')
+  ignoreFailures = false
 }
 
 tasks.named("formatMain").configure { dependsOn("checkstyleMain") }
