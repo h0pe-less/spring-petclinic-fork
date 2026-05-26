@@ -13,6 +13,9 @@ pipeline {
    
     stages {
         stage('Checkstyle') {
+	    when {
+		not { branch 'main' }
+	    }
             steps {
                echo 'Checkstyle started'
 		withCredentials([usernamePassword(credentialsId: env.REGISTRY_CREDS, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
@@ -27,6 +30,9 @@ pipeline {
         }
         
         stage('Test') {
+	    when {
+		not { branch 'main' }
+	    }
             steps {
                 echo 'Tests started'
 		withCredentials([usernamePassword(credentialsId: env.REGISTRY_CREDS, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
@@ -38,15 +44,24 @@ pipeline {
         stage('Build & Push Image') {
             steps {
                 script {
-                    def fullImageTarget = "${REGISTRY_URL}/${IMAGE_NAME}:${SHORT_COMMIT}"
+		    def targetPort = ""
+                    if (env.BRANCH_NAME == 'main') {
+                        targetPort = "8086"
+                        echo "MAIN BRANCH port: ${targetPort}"
+                    } else {
+                        targetPort = "8087"
+                        echo "MERGE REQUEST port: ${targetPort}"
+                    }
+		    def currentRegistry = "${REGISTRY_HOST}:${targetPort}"
+                    def commitHash = env.GIT_COMMIT ? env.GIT_COMMIT.take(7) : 'latest'
+                    def fullImageTarget = "${currentRegistry}/${IMAGE_NAME}:${commitHash}"
                     
                     echo "Building Docker image: ${fullImageTarget}"
                     sh "docker build -t ${fullImageTarget} ."
                     
                     withCredentials([usernamePassword(credentialsId: env.REGISTRY_CREDS, usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PASS')]) {
                         echo 'Log into Nexus: '
-                        sh "docker login -u '${REGISTRY_USER}' -p '${REGISTRY_PASS}' ${REGISTRY_URL}"
-                        
+                        sh "docker login -u '${REGISTRY_USER}' -p '${REGISTRY_PASS}' ${currentRegistry}"    
                         echo 'Push into Nexus: '
                         sh "docker push ${fullImageTarget}"
                     }
