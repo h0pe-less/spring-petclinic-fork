@@ -15,7 +15,9 @@ pipeline {
         stage('Checkstyle') {
             steps {
                echo 'Checkstyle started'
-                sh './gradlew checkstyleMain checkstyleTest --continue'
+		withCredentials([usernamePassword(credentialsId: env.REGISTRY_CREDS, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                        sh "./gradlew checkstyleMain checkstyleTest --continue -PnexusUsername='${NEXUS_USER}' -PnexusPassword='${NEXUS_PASS}'"
+                  }
             }
             post {
                 always {
