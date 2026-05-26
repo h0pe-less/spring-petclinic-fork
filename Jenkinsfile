@@ -4,7 +4,7 @@ pipeline {
     }
 
     environment {
-        REGISTRY_URL   = '172.18.50.164:8087'
+        REGISTRY_HOST  = '172.18.50.164'
         REGISTRY_REPO  = '' 
         IMAGE_NAME     = 'spring-petclinic-image' 
         SHORT_COMMIT   = "${env.GIT_COMMIT ? env.GIT_COMMIT[0..6] : 'latest'}"
