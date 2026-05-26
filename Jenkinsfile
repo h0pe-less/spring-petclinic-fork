@@ -30,7 +30,7 @@ pipeline {
             steps {
                 echo 'Tests started'
 		withCredentials([usernamePassword(credentialsId: env.REGISTRY_CREDS, usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
-                        sh "./gradlew test PnexusUsername='${NEXUS_USER}' -PnexusPassword='${NEXUS_PASS}'"
+                        sh "./gradlew test -PnexusUsername='${NEXUS_USER}' -PnexusPassword='${NEXUS_PASS}'"
                   }
             }
         }
